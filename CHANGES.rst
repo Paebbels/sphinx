@@ -18,6 +18,11 @@ Bugs fixed
 
 * #14797: Add missing hyphen to CVE and CWE role formats.
   Patch by Hugo van Kemenade
+* #13190: Give a downloaded remote image the file extension of its content
+  when the last part of its URL has a dot, but no image file extension,
+  and when a long name is hashed: its extension no longer includes the
+  query string.
+  Patch by Patrick Lehmann.
 
 Testing
 -------

@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 from contextlib import chdir
+from hashlib import sha1
 from pathlib import Path
 from shutil import copyfile
 from subprocess import CalledProcessError
@@ -1801,6 +1802,43 @@ def test_latex_images(app: SphinxTestApp) -> None:
         '\\sphinxhref{https://www.python.org/}{{\\hspace*{\\fill}'
         '\\sphinxincludegraphics{{rimg}.png}\\hspace*{\\fill}}}\n\n'
     ) in result
+
+
+class RemoteImageNamesHandler(RemoteImageHandler):
+    def do_GET(self) -> None:
+        if self.path.startswith('/badge/'):
+            img_path = TEST_ROOTS_DIR / 'test-local-logo' / 'images' / 'img.png'
+            self._send_bytes(img_path.read_bytes(), 'image/png')
+        elif self.path == '/logo.png':
+            img_path = TEST_ROOTS_DIR / 'test-local-logo' / 'images' / 'img.png'
+            self._send_bytes(img_path.read_bytes(), 'image/png')
+        else:
+            self._send_not_found()
+
+
+@pytest.mark.sphinx('latex', testroot='latex-remote-image-names')
+def test_latex_remote_image_names(app: SphinxTestApp) -> None:
+    with http_server(RemoteImageNamesHandler, port=7777):
+        app.build(force_all=True)
+
+    result = (app.outdir / 'projectnamenotset.tex').read_text(encoding='utf8')
+
+    # a dot in the name is no image suffix: the suffix of the content is appended
+    assert '\\sphinxincludegraphics{{pkg.name}.png}' in result
+    assert (app.outdir / 'pkg.name.png').exists()
+
+    # a name too long is hashed; its suffix doesn't include the query string
+    long_name = sha1(
+        b'http://localhost:7777/badge/0123456789abcdef0123456789abcdef',
+        usedforsecurity=False,
+    ).hexdigest()
+    assert f'\\sphinxincludegraphics{{{{{long_name}}}.png}}' in result
+    assert (app.outdir / f'{long_name}.png').exists()
+    assert '?style=flat' not in result
+
+    # an image suffix matching the content is kept
+    assert '\\sphinxincludegraphics{{logo}.png}' in result
+    assert (app.outdir / 'logo.png').exists()
 
 
 @pytest.mark.sphinx('latex', testroot='latex-index')
