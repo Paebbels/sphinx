@@ -1803,6 +1803,27 @@ def test_latex_images(app: SphinxTestApp) -> None:
     ) in result
 
 
+class RemoteImagePercentHandler(RemoteImageHandler):
+    def do_GET(self) -> None:
+        if self.path == '/badge/doc-CC--BY%204.0-green.png':
+            img_path = TEST_ROOTS_DIR / 'test-local-logo' / 'images' / 'img.png'
+            self._send_bytes(img_path.read_bytes(), 'image/png')
+        else:
+            self._send_not_found()
+
+
+@pytest.mark.sphinx('latex', testroot='latex-remote-image-percent')
+def test_latex_remote_image_percent(app: SphinxTestApp) -> None:
+    with http_server(RemoteImagePercentHandler, port=7777):
+        app.build(force_all=True)
+
+    result = (app.outdir / 'projectnamenotset.tex').read_text(encoding='utf8')
+
+    # '%' would start a LaTeX comment in the file name
+    assert '\\sphinxincludegraphics{{doc-CC--BY_204.0-green}.png}' in result
+    assert (app.outdir / 'doc-CC--BY_204.0-green.png').exists()
+
+
 @pytest.mark.sphinx('latex', testroot='latex-index')
 def test_latex_index(app: SphinxTestApp) -> None:
     app.build(force_all=True)
