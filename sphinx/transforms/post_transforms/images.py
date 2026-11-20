@@ -16,7 +16,12 @@ from sphinx.transforms import SphinxTransform
 from sphinx.util import logging, requests
 from sphinx.util._pathlib import _StrPath
 from sphinx.util.http_date import epoch_to_rfc1123, rfc1123_to_epoch
-from sphinx.util.images import get_image_extension, guess_mimetype, parse_data_uri
+from sphinx.util.images import (
+    get_image_extension,
+    guess_mimetype,
+    mime_suffixes,
+    parse_data_uri,
+)
 from sphinx.util.osutil import ensuredir
 
 if TYPE_CHECKING:
@@ -64,7 +69,8 @@ class ImageDownloader(BaseImageConverter):
             if '?' in basename:
                 basename = basename.split('?')[0]
             if not basename or len(basename) > MAX_FILENAME_LEN:
-                filename, ext = os.path.splitext(node['uri'])
+                # the extension must not include the query string
+                filename, ext = os.path.splitext(node['uri'].split('?')[0])
                 basename = (
                     sha1(filename.encode(), usedforsecurity=False).hexdigest() + ext
                 )
@@ -111,8 +117,9 @@ class ImageDownloader(BaseImageConverter):
         self.env.original_image_uri[str_path] = node['uri']
 
         mimetype = guess_mimetype(path, default='*')
-        if mimetype != '*' and not path.suffix:
-            # append a suffix if URI does not contain suffix
+        if mimetype != '*' and mime_suffixes.get(path.suffix.lower()) != mimetype:
+            # append a suffix if URI does not contain a suffix for its content,
+            # e.g. 'https://example.org/badge/pkg.name' -> 'pkg.name.png'
             ext = get_image_extension(mimetype) or ''
             with_ext = path.with_name(path.name + ext)
             path.replace(with_ext)

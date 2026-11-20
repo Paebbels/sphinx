@@ -33,6 +33,7 @@ def test_guess_mimetype() -> None:
     # guess by filename
     assert guess_mimetype('img.png') == 'image/png'
     assert guess_mimetype('img.jpg') == 'image/jpeg'
+    assert guess_mimetype('img.jpeg') == 'image/jpeg'
     assert guess_mimetype('img.txt') is None
     assert guess_mimetype('img.txt', default='text/plain') == 'text/plain'
     assert guess_mimetype('no_extension') is None

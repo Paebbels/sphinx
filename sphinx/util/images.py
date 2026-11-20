@@ -22,6 +22,7 @@ except ImportError:
 mime_suffixes = {
     '.gif': 'image/gif',
     '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
     '.png': 'image/png',
     '.pdf': 'application/pdf',
     '.svg': 'image/svg+xml',
