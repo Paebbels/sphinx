@@ -28,8 +28,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 MAX_FILENAME_LEN = 32
-# characters a file system or LaTeX can't handle in a file name ('%' starts a
-# LaTeX comment, e.g. in a percent-encoded URL)
 CRITICAL_PATH_CHAR_RE = re.compile('[:;<>|*" %]')
 
 
