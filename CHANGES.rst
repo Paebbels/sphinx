@@ -18,6 +18,9 @@ Bugs fixed
 
 * #14797: Add missing hyphen to CVE and CWE role formats.
   Patch by Hugo van Kemenade
+* #13189: Replace ``%`` in the file name of a downloaded remote image, which
+  started a comment in the LaTeX output, e.g. for a percent-encoded space.
+  Patch by Patrick Lehmann.
 
 Testing
 -------

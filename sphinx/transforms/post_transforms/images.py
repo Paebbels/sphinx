@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 MAX_FILENAME_LEN = 32
-CRITICAL_PATH_CHAR_RE = re.compile('[:;<>|*" ]')
+CRITICAL_PATH_CHAR_RE = re.compile('[:;<>|*" %]')
 
 
 class BaseImageConverter(SphinxTransform):
