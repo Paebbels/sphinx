@@ -1806,10 +1806,7 @@ def test_latex_images(app: SphinxTestApp) -> None:
 
 class RemoteImageNamesHandler(RemoteImageHandler):
     def do_GET(self) -> None:
-        if self.path.startswith('/badge/'):
-            img_path = TEST_ROOTS_DIR / 'test-local-logo' / 'images' / 'img.png'
-            self._send_bytes(img_path.read_bytes(), 'image/png')
-        elif self.path == '/logo.png':
+        if self.path.startswith('/badge/') or self.path == '/logo.png':
             img_path = TEST_ROOTS_DIR / 'test-local-logo' / 'images' / 'img.png'
             self._send_bytes(img_path.read_bytes(), 'image/png')
         else:
